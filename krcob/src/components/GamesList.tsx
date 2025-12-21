@@ -25,7 +25,7 @@ export function GamesList() {
   const isAdmin = useQuery(api.games.checkAdminStatus);
 
   const handleRemoveGame = async (gameId: string, e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent opening the game details modal
+    e.stopPropagation();
     if (confirm("هل أنت متأكد من حذف هذه اللعبة؟")) {
       try {
         await removeGame({ id: gameId as any });
@@ -37,7 +37,7 @@ export function GamesList() {
   };
 
   const handleEditGame = (game: any, e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent opening the game details modal
+    e.stopPropagation();
     setEditingGame(game);
   };
 
@@ -71,6 +71,15 @@ export function GamesList() {
       </div>
     );
   }
+
+  // تطبيق التصفية الصارمة (AND logic) قبل العرض
+  const filteredGames = games.filter((game) => {
+    if (selectedCategories.length === 0) return true;
+    // يجب أن تحتوي اللعبة على كل التصنيفات المختارة
+    return selectedCategories.every((selectedCat) => 
+      game.categories.includes(selectedCat)
+    );
+  });
 
   return (
     <div className="space-y-6">
@@ -154,13 +163,13 @@ export function GamesList() {
         </div>
         {selectedCategories.length > 0 && (
           <div className="mt-3 text-sm text-purple-200">
-            التصنيفات المحددة: {selectedCategories.length}
+            تم تصفية النتائج لتشمل جميع التصنيفات المحددة ({selectedCategories.length})
           </div>
         )}
       </div>
 
       {/* Games Grid */}
-      {games.length === 0 ? (
+      {filteredGames.length === 0 ? (
         <div className="text-center py-12">
           <div className="text-6xl mb-4">🎮</div>
           <h3 className="text-2xl font-bold text-white mb-2">لا توجد ألعاب</h3>
@@ -168,15 +177,14 @@ export function GamesList() {
             {actualSearchQuery 
               ? `لا توجد نتائج للبحث عن "${actualSearchQuery}"`
               : selectedCategories.length > 0
-              ? "لا توجد ألعاب في التصنيفات المحددة"
+              ? "لا توجد ألعاب تجمع هذه التصنيفات معاً حالياً"
               : "لا توجد ألعاب حالياً"
             }
           </p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {games.map((game) => {
-            // Count total media
+          {filteredGames.map((game) => {
             const totalImages = 1 + (game.additionalImages?.length || 0);
             const totalVideos = (game.videoUrl ? 1 : 0) + (game.additionalVideos?.length || 0);
             
@@ -200,14 +208,12 @@ export function GamesList() {
                     </div>
                   )}
                   
-                  {/* Overlay with click hint */}
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-300 flex items-center justify-center">
                     <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2">
                       <span className="text-white font-medium text-sm">اضغط لعرض التفاصيل</span>
                     </div>
                   </div>
 
-                  {/* Media indicators */}
                   <div className="absolute top-2 right-2 flex gap-1">
                     {totalVideos > 0 && (
                       <div className="bg-red-600 text-white px-2 py-1 rounded text-xs font-bold flex items-center gap-1">
@@ -222,13 +228,6 @@ export function GamesList() {
                       </div>
                     )}
                   </div>
-
-                  {/* Update indicator */}
-                  {game.updatedAt && (
-                    <div className="absolute top-2 left-2 bg-yellow-600 text-white px-2 py-1 rounded text-xs font-bold">
-                      محدث
-                    </div>
-                  )}
                 </div>
 
                 {/* Content */}
@@ -242,14 +241,12 @@ export function GamesList() {
                         <button
                           onClick={(e) => handleEditGame(game, e)}
                           className="text-blue-400 hover:text-blue-300 p-1 rounded transition-colors"
-                          title="تعديل اللعبة"
                         >
                           ✏️
                         </button>
                         <button
                           onClick={(e) => handleRemoveGame(game._id, e)}
                           className="text-red-400 hover:text-red-300 p-1 rounded transition-colors"
-                          title="حذف اللعبة"
                         >
                           🗑️
                         </button>
@@ -258,7 +255,7 @@ export function GamesList() {
                   </div>
                   
                   <div className="mb-3 flex flex-wrap gap-1">
-                    {game.categories.map((category, index) => {
+                    {game.categories.map((category: string, index: number) => {
                       const tagData = categoriesWithDescriptions.find(tag => tag.name === category);
                       return (
                         <TagWithDescription
@@ -280,14 +277,6 @@ export function GamesList() {
                     <span>بواسطة: {game.createdByName || "مدير"}</span>
                     <span>{new Date(game._creationTime).toLocaleDateString('ar-SA')}</span>
                   </div>
-                  
-                  {/* Update info */}
-                  {game.updatedAt && (
-                    <div className="mt-2 pt-2 border-t border-white/10 flex justify-between items-center text-xs text-yellow-300">
-                      <span>آخر تحديث: {game.updatedByName || "مدير"}</span>
-                      <span>{new Date(game.updatedAt).toLocaleDateString('ar-SA')}</span>
-                    </div>
-                  )}
                 </div>
               </div>
             );
@@ -295,7 +284,6 @@ export function GamesList() {
         </div>
       )}
 
-      {/* Game Details Modal */}
       {selectedGameId && (
         <GameDetailsModal
           gameId={selectedGameId}
@@ -303,7 +291,6 @@ export function GamesList() {
         />
       )}
 
-      {/* Edit Modal */}
       {editingGame && (
         <EditGameModal
           game={editingGame}
@@ -315,7 +302,6 @@ export function GamesList() {
         />
       )}
 
-      {/* Categories Info Modal */}
       {showCategoriesInfo && (
         <CategoriesInfoModal onClose={() => setShowCategoriesInfo(false)} />
       )}
