@@ -49,6 +49,7 @@ export const list = query({
     searchQuery: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    // إذا كان هناك بحث نصي
     if (args.searchQuery) {
       const searchResults = await ctx.db
         .query("games")
@@ -58,19 +59,22 @@ export const list = query({
         .collect();
       
       if (args.categories && args.categories.length > 0) {
+        // التعديل هنا: استخدام every بدلاً من some لجمع التصنيفات (AND Logic)
         return searchResults.filter(game => 
-          game.categories.some(category => args.categories!.includes(category))
+          args.categories!.every(category => game.categories.includes(category))
         ).sort((a, b) => b._creationTime - a._creationTime);
       }
       
       return searchResults.sort((a, b) => b._creationTime - a._creationTime);
     }
     
+    // إذا كان لا يوجد بحث نصي (عرض القائمة العادية)
     let result = await ctx.db.query("games").order("desc").collect();
     
     if (args.categories && args.categories.length > 0) {
+      // التعديل هنا أيضاً: استخدام every لضمان ظهور النتائج التي تجمع كل التصنيفات
       result = result.filter(game => 
-        game.categories.some(category => args.categories!.includes(category))
+        args.categories!.every(category => game.categories.includes(category))
       );
     }
     
