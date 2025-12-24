@@ -2,7 +2,7 @@ import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 import { authTables } from "@convex-dev/auth/server";
 
-// Extend the users table to include adminCode
+// 1. إعداد جداول الهوية (Auth Tables) مع إضافة adminCode
 const extendedAuthTables = {
   ...authTables,
   users: defineTable({
@@ -19,6 +19,7 @@ const extendedAuthTables = {
     .index("phone", ["phone"]),
 };
 
+// 2. إعداد جداول التطبيق (Games & Tags)
 const applicationTables = {
   games: defineTable({
     title: v.string(),
@@ -39,15 +40,19 @@ const applicationTables = {
   
   tags: defineTable({
     name: v.string(),
+    group: v.string(), // الحقل الجديد لتصنيف التاقات إلى مجموعات
     description: v.optional(v.string()),
     createdBy: v.id("users"),
     createdByName: v.optional(v.string()),
     updatedAt: v.optional(v.number()),
     updatedBy: v.optional(v.id("users")),
     updatedByName: v.optional(v.string()),
-  }).index("by_name", ["name"]),
+  })
+    .index("by_name", ["name"])
+    .index("by_group", ["group"]), // فهرس جديد لتسريع تصفية المجموعات في صفحة البحث
 };
 
+// 3. تصدير المخطط الكامل
 export default defineSchema({
   ...extendedAuthTables,
   ...applicationTables,
