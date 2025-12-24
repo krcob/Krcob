@@ -1,6 +1,6 @@
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { toast } from "sonner";
 import { EditGameModal } from "./EditGameModal";
 import { TagWithDescription } from "./TagWithDescription";
@@ -23,6 +23,17 @@ export function GamesList() {
   const categoriesWithDescriptions = useQuery(api.games.getCategoriesWithDescriptions);
   const removeGame = useMutation(api.games.remove);
   const isAdmin = useQuery(api.games.checkAdminStatus);
+
+  // تنظيم التاقات في مجموعات برمجياً لسهولة العرض
+  const groupedCategories = useMemo(() => {
+    if (!categoriesWithDescriptions) return {};
+    return categoriesWithDescriptions.reduce((acc: any, tag) => {
+      const group = tag.group || "تصنيفات أخرى";
+      if (!acc[group]) acc[group] = [];
+      acc[group].push(tag);
+      return acc;
+    }, {});
+  }, [categoriesWithDescriptions]);
 
   const handleRemoveGame = async (gameId: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -72,17 +83,15 @@ export function GamesList() {
     );
   }
 
-  // تطبيق التصفية الصارمة (AND logic) قبل العرض
   const filteredGames = games.filter((game) => {
     if (selectedCategories.length === 0) return true;
-    // يجب أن تحتوي اللعبة على كل التصنيفات المختارة
     return selectedCategories.every((selectedCat) => 
       game.categories.includes(selectedCat)
     );
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" dir="rtl">
       {/* Search Bar */}
       <div className="bg-black/20 backdrop-blur-md rounded-xl p-6 border border-white/10">
         <h3 className="text-xl font-bold text-white mb-4">البحث في الألعاب</h3>
@@ -93,14 +102,11 @@ export function GamesList() {
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyPress={handleSearchKeyPress}
             placeholder="ابحث عن اسم اللعبة واضغط Enter..."
-            className="w-full px-4 py-3 pr-12 pl-20 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:border-purple-400 focus:ring-1 focus:ring-purple-400 outline-none transition-all"
+            className="w-full px-4 py-3 pr-4 pl-20 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:border-purple-400 focus:ring-1 focus:ring-purple-400 outline-none transition-all"
           />
-          <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">
-            🔍
-          </div>
           <button
             type="submit"
-            className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded text-sm transition-colors"
+            className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-1.5 rounded-lg text-sm transition-colors font-bold"
           >
             بحث
           </button>
@@ -115,71 +121,74 @@ export function GamesList() {
               }}
               className="text-red-400 hover:text-red-300 text-sm"
             >
-              ✕ مسح
+              ✕ مسح البحث
             </button>
           </div>
         )}
       </div>
 
-      {/* Category Filter */}
-      <div className="bg-black/20 backdrop-blur-md rounded-xl p-6 border border-white/10">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-xl font-bold text-white">
-            تصفية حسب التصنيف
-            {isAdmin && (
-              <span className="text-sm text-purple-200 font-normal mr-2">
-                (اضغط مرتين على التصنيف لرؤية الوصف)
-              </span>
-            )}
+      {/* Category Filter - Organized by Groups */}
+      <div className="bg-black/20 backdrop-blur-md rounded-xl p-6 border border-white/10 shadow-xl">
+        <div className="flex justify-between items-center mb-6">
+          <h3 className="text-xl font-bold text-white flex items-center gap-2">
+            <span className="text-2xl">🏷️</span> 
+            تصفية متقدمة
           </h3>
-          <button
-            onClick={() => setShowCategoriesInfo(true)}
-            className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white px-4 py-2 rounded-lg font-semibold transition-all duration-200 shadow-lg hover:shadow-xl text-sm"
-          >
-            معنى التصنيفات
-          </button>
+          <div className="flex gap-2">
+            {selectedCategories.length > 0 && (
+              <button
+                onClick={() => setSelectedCategories([])}
+                className="bg-red-500/20 text-red-400 border border-red-500/50 px-4 py-2 rounded-lg font-bold transition-all text-sm hover:bg-red-500/30"
+              >
+                مسح التصنيفات
+              </button>
+            )}
+            <button
+              onClick={() => setShowCategoriesInfo(true)}
+              className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-semibold transition-all text-sm"
+            >
+              معنى التصنيفات
+            </button>
+          </div>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <button
-            onClick={() => setSelectedCategories([])}
-            className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
-              selectedCategories.length === 0
-                ? "bg-purple-600 text-white shadow-lg"
-                : "bg-white/10 text-purple-200 hover:bg-white/20"
-            }`}
-          >
-            جميع الألعاب
-          </button>
-          {categoriesWithDescriptions.map((tag) => (
-            <TagWithDescription
-              key={tag._id}
-              name={tag.name}
-              description={tag.description}
-              isSelected={selectedCategories.includes(tag.name)}
-              onClick={() => toggleCategory(tag.name)}
-              showDoubleClickHint={isAdmin}
-            />
+
+        {/* عرض المجموعات المقسمة */}
+        <div className="space-y-8">
+          {Object.entries(groupedCategories).map(([groupName, tags]: [string, any]) => (
+            <div key={groupName} className="group-section">
+              <h4 className="text-sm font-bold text-purple-400 mb-3 flex items-center gap-2 opacity-80 uppercase tracking-widest">
+                <span className="w-2 h-2 bg-purple-500 rounded-full shadow-[0_0_8px_#a855f7]"></span>
+                {groupName}
+              </h4>
+              <div className="flex flex-wrap gap-2">
+                {tags.map((tag: any) => (
+                  <TagWithDescription
+                    key={tag._id}
+                    name={tag.name}
+                    description={tag.description}
+                    isSelected={selectedCategories.includes(tag.name)}
+                    onClick={() => toggleCategory(tag.name)}
+                    showDoubleClickHint={isAdmin}
+                    className={`transition-all duration-300 transform hover:scale-105 cursor-pointer ${
+                      selectedCategories.includes(tag.name)
+                        ? "!bg-purple-600 !text-white !border-purple-400 shadow-lg"
+                        : "!bg-white/5 !text-purple-200/70 !border-white/5 hover:!border-purple-500/30 hover:!bg-white/10"
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
           ))}
         </div>
-        {selectedCategories.length > 0 && (
-          <div className="mt-3 text-sm text-purple-200">
-            تم تصفية النتائج لتشمل جميع التصنيفات المحددة ({selectedCategories.length})
-          </div>
-        )}
       </div>
 
       {/* Games Grid */}
       {filteredGames.length === 0 ? (
-        <div className="text-center py-12">
-          <div className="text-6xl mb-4">🎮</div>
-          <h3 className="text-2xl font-bold text-white mb-2">لا توجد ألعاب</h3>
-          <p className="text-purple-200">
-            {actualSearchQuery 
-              ? `لا توجد نتائج للبحث عن "${actualSearchQuery}"`
-              : selectedCategories.length > 0
-              ? "لا توجد ألعاب تجمع هذه التصنيفات معاً حالياً"
-              : "لا توجد ألعاب حالياً"
-            }
+        <div className="text-center py-20 bg-black/10 rounded-xl border border-dashed border-white/10">
+          <div className="text-6xl mb-4 opacity-50">🎮</div>
+          <h3 className="text-2xl font-bold text-white mb-2">لا توجد نتائج</h3>
+          <p className="text-purple-200 opacity-70">
+            جرب تغيير معايير البحث أو مسح التصنيفات المختارة
           </p>
         </div>
       ) : (
@@ -194,88 +203,65 @@ export function GamesList() {
                 onClick={() => handleGameClick(game._id)}
                 className="bg-black/30 backdrop-blur-md rounded-xl overflow-hidden border border-white/10 hover:border-purple-400/50 transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/20 cursor-pointer group"
               >
-                {/* Image */}
+                {/* Image Section */}
                 <div className="aspect-video bg-gray-800 relative overflow-hidden">
                   {game.imageUrl ? (
                     <img
                       src={game.imageUrl}
                       alt={game.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-400">
-                      <span className="text-4xl">🎮</span>
-                    </div>
+                    <div className="w-full h-full flex items-center justify-center text-gray-400 text-4xl">🎮</div>
                   )}
                   
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-300 flex items-center justify-center">
-                    <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2">
-                      <span className="text-white font-medium text-sm">اضغط لعرض التفاصيل</span>
-                    </div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center p-4">
+                    <span className="text-white font-bold text-sm bg-purple-600/80 px-4 py-2 rounded-full backdrop-blur-sm">عرض التفاصيل</span>
                   </div>
 
                   <div className="absolute top-2 right-2 flex gap-1">
                     {totalVideos > 0 && (
-                      <div className="bg-red-600 text-white px-2 py-1 rounded text-xs font-bold flex items-center gap-1">
-                        <span>📹</span>
-                        <span>{totalVideos}</span>
+                      <div className="bg-red-600 text-white px-2 py-1 rounded text-[10px] font-bold flex items-center gap-1 shadow-lg">
+                        <span>📹</span> {totalVideos}
                       </div>
                     )}
                     {totalImages > 1 && (
-                      <div className="bg-blue-600 text-white px-2 py-1 rounded text-xs font-bold flex items-center gap-1">
-                        <span>🖼️</span>
-                        <span>{totalImages}</span>
+                      <div className="bg-blue-600 text-white px-2 py-1 rounded text-[10px] font-bold flex items-center gap-1 shadow-lg">
+                        <span>🖼️</span> {totalImages}
                       </div>
                     )}
                   </div>
                 </div>
 
-                {/* Content */}
-                <div className="p-6">
+                {/* Content Section */}
+                <div className="p-5">
                   <div className="flex justify-between items-start mb-3">
-                    <h3 className="text-xl font-bold text-white line-clamp-2">
+                    <h3 className="text-lg font-bold text-white line-clamp-1 group-hover:text-purple-400 transition-colors">
                       {game.title}
                     </h3>
                     {isAdmin && (
                       <div className="flex gap-2">
-                        <button
-                          onClick={(e) => handleEditGame(game, e)}
-                          className="text-blue-400 hover:text-blue-300 p-1 rounded transition-colors"
-                        >
-                          ✏️
-                        </button>
-                        <button
-                          onClick={(e) => handleRemoveGame(game._id, e)}
-                          className="text-red-400 hover:text-red-300 p-1 rounded transition-colors"
-                        >
-                          🗑️
-                        </button>
+                        <button onClick={(e) => handleEditGame(game, e)} className="hover:scale-125 transition-transform">✏️</button>
+                        <button onClick={(e) => handleRemoveGame(game._id, e)} className="hover:scale-125 transition-transform">🗑️</button>
                       </div>
                     )}
                   </div>
                   
                   <div className="mb-3 flex flex-wrap gap-1">
-                    {game.categories.map((category: string, index: number) => {
-                      const tagData = categoriesWithDescriptions.find(tag => tag.name === category);
-                      return (
-                        <TagWithDescription
-                          key={index}
-                          name={category}
-                          description={tagData?.description}
-                          className="inline-block bg-purple-600/30 text-purple-200 px-2 py-1 rounded-full text-xs font-medium"
-                          showDoubleClickHint={isAdmin}
-                        />
-                      );
-                    })}
+                    {game.categories.map((category: string, index: number) => (
+                      <span key={index} className="bg-purple-600/20 text-purple-300 border border-purple-500/20 px-2 py-0.5 rounded text-[10px] font-medium">
+                        {category}
+                      </span>
+                    ))}
                   </div>
                   
-                  <p className="text-gray-300 text-sm mb-4 line-clamp-3">
+                  <p className="text-gray-400 text-xs mb-4 line-clamp-2 h-8">
                     {game.description}
                   </p>
                   
-                  <div className="flex justify-between items-center text-xs text-gray-400">
-                    <span>بواسطة: {game.createdByName || "مدير"}</span>
-                    <span>{new Date(game._creationTime).toLocaleDateString('ar-SA')}</span>
+                  <div className="flex justify-between items-center text-[10px] text-gray-500 pt-3 border-t border-white/5">
+                    <span>👤 {game.createdByName || "مدير"}</span>
+                    <span>📅 {new Date(game._creationTime).toLocaleDateString('ar-SA')}</span>
                   </div>
                 </div>
               </div>
@@ -284,11 +270,9 @@ export function GamesList() {
         </div>
       )}
 
+      {/* Modals */}
       {selectedGameId && (
-        <GameDetailsModal
-          gameId={selectedGameId}
-          onClose={() => setSelectedGameId(null)}
-        />
+        <GameDetailsModal gameId={selectedGameId} onClose={() => setSelectedGameId(null)} />
       )}
 
       {editingGame && (
