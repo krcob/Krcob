@@ -37,6 +37,7 @@ export const list = query({
 export const add = mutation({
   args: {
     name: v.string(),
+    group: v.string(), // إضافة حقل المجموعة هنا
     description: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
@@ -57,6 +58,7 @@ export const add = mutation({
 
     return await ctx.db.insert("tags", {
       name: args.name,
+      group: args.group, // تخزين المجموعة في قاعدة البيانات
       description: args.description,
       createdBy: adminInfo.userId,
       createdByName: adminInfo.adminName,
@@ -68,6 +70,7 @@ export const update = mutation({
   args: {
     id: v.id("tags"),
     name: v.string(),
+    group: v.string(), // إضافة حقل المجموعة هنا أيضاً للتعديل
     description: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
@@ -96,6 +99,7 @@ export const update = mutation({
 
     return await ctx.db.patch(args.id, {
       name: args.name,
+      group: args.group, // تحديث المجموعة
       description: args.description,
       updatedAt: Date.now(),
       updatedBy: adminInfo.userId,
