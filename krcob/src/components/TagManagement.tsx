@@ -3,11 +3,10 @@ import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { toast } from "sonner";
 
-// التعديل: فصل المجموعات لتصبح خيارات مستقلة
+// إعادة المجموعات لوضعها المدمج السابق
 const TAG_GROUPS = [
   "أنواع الألعاب (Genres)",
-  "نمط اللعب",
-  "نوع الاتصال",
+  "نمط اللعب والاتصال (Play Style)", // تم الدمج مجدداً
   "المنصات والأجهزة (Platforms)",
   "المتاجر والوصول (Stores & Access)",
   "الأبعاد والمنظور (Visuals & Perspective)"
