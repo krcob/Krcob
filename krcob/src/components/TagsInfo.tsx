@@ -1,6 +1,7 @@
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
-import { getGroupTheme } from "../../lib/utils";
+// التصحيح: الخروج بمستوى واحد للوصول لمجلد lib من داخل مجلد components
+import { getGroupTheme } from "../lib/utils";
 
 export default function TagsInfoPage() {
   const allTags = useQuery(api.tags.list);
