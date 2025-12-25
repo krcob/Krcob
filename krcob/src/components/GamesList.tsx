@@ -47,7 +47,7 @@ export function GamesList() {
 
   return (
     <div className="space-y-8" dir="rtl">
-      {/* شريط البحث */}
+      {/* 1. شريط البحث */}
       <div className="bg-black/20 backdrop-blur-md rounded-2xl p-6 border border-white/5 shadow-2xl">
         <form onSubmit={(e) => { e.preventDefault(); setActualSearchQuery(searchQuery); }} className="relative">
           <input
@@ -61,20 +61,21 @@ export function GamesList() {
         </form>
       </div>
 
-      {/* قسم التصفية الذكية */}
-      <div className="bg-black/20 backdrop-blur-md rounded-2xl p-6 border border-white/5 shadow-2xl relative">
-        <div className="flex flex-wrap justify-between items-center mb-8 pb-4 border-b border-white/5 gap-4">
+      {/* 2. قسم التصفية الذكية */}
+      <div className="bg-black/20 backdrop-blur-md rounded-2xl p-6 border border-white/5 shadow-2xl relative overflow-visible">
+        <div className="flex justify-between items-center mb-8 pb-4 border-b border-white/5">
           <div className="flex items-center gap-4">
             <h3 className="text-xl font-black text-white flex items-center gap-3">
               <span className="p-2 bg-purple-500/20 rounded-lg text-purple-400 text-sm">⚡</span>
               تصفية ذكية
             </h3>
 
-            {/* الزر "النازل" من الأعلى بمواصفاته الكاملة ليعمل بشكل مستقل */}
+            {/* تم استخدام وسم <a> بسيط جداً مع منع أي تفاعل برمي آخر */}
             <a 
               href="/tags-info" 
-              className="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-500 text-white text-[11px] font-bold px-4 py-2 rounded-xl transition-all shadow-lg border border-purple-400/30"
-              style={{ textDecoration: 'none' }}
+              onMouseDown={(e) => e.stopPropagation()} 
+              className="bg-purple-600 hover:bg-purple-500 text-white text-[11px] font-bold px-4 py-2 rounded-xl transition-all shadow-lg flex items-center gap-2"
+              style={{ zIndex: 9999, position: 'relative', display: 'flex' }}
             >
               <span className="bg-white/20 w-5 h-5 flex items-center justify-center rounded-full text-[10px]">؟</span>
               معنى التصنيفات
@@ -122,7 +123,7 @@ export function GamesList() {
         </div>
       </div>
 
-      {/* عرض الألعاب */}
+      {/* 3. عرض الألعاب */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {games.map((game) => (
           <div
@@ -139,7 +140,7 @@ export function GamesList() {
                   const tagInfo = categoriesWithDescriptions?.find(t => t.name === cat);
                   const theme = getGroupTheme(tagInfo?.group || "");
                   return (
-                    <span key={cat} className={`px-2 py-0.5 rounded text-[9px] font-black text-white ${theme.bg} backdrop-blur-md shadow-sm`}>
+                    <span key={cat} className={`px-2 py-0.5 rounded text-[9px] font-black text-white ${theme.bg} backdrop-blur-md`}>
                       {cat}
                     </span>
                   );
@@ -153,7 +154,7 @@ export function GamesList() {
                 {isAdmin && (
                   <button 
                     onClick={(e) => { e.stopPropagation(); setEditingGame(game); }} 
-                    className="opacity-0 group-hover:opacity-100 p-2 bg-white/10 rounded-lg hover:bg-purple-500 transition-all duration-300"
+                    className="opacity-0 group-hover:opacity-100 p-2 bg-white/10 rounded-lg hover:bg-purple-500"
                   >
                     ✏️
                   </button>
@@ -163,7 +164,7 @@ export function GamesList() {
               
               <div className="flex justify-between items-center border-t border-white/5 pt-4">
                 <span className="text-[10px] text-gray-500 font-bold uppercase">📅 {new Date(game._creationTime).toLocaleDateString('ar-SA')}</span>
-                <span className="text-[10px] text-purple-400 font-black tracking-widest uppercase group-hover:translate-x-[-4px] transition-transform">التفاصيل ←</span>
+                <span className="text-[10px] text-purple-400 font-black tracking-widest uppercase">التفاصيل ←</span>
               </div>
             </div>
           </div>
