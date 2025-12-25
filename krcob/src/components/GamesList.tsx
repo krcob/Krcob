@@ -61,7 +61,7 @@ export function GamesList() {
         </form>
       </div>
 
-      {/* قسم التصفية الذكية مع الزر المحسن */}
+      {/* قسم التصفية الذكية */}
       <div className="bg-black/20 backdrop-blur-md rounded-2xl p-6 border border-white/5 shadow-2xl">
         <div className="flex justify-between items-center mb-8 pb-4 border-b border-white/5">
           <div className="flex items-center gap-6">
@@ -70,14 +70,18 @@ export function GamesList() {
               تصفية ذكية
             </h3>
 
-            {/* الزر المحسن: يعمل الآن ويشبه الزر العلوي تماماً */}
-            <a 
-              href="/tags-info" 
-              className="flex items-center gap-2 bg-purple-600 hover:bg-purple-500 text-white text-[12px] font-black px-4 py-2 rounded-xl transition-all shadow-lg hover:scale-105 active:scale-95"
+            {/* تم تغيير الوسم إلى button مع منع انتشار الحدث (stopPropagation) لضمان العمل */}
+            <button 
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation(); // يمنع الكود من اعتباره ضغطة على التصنيفات
+                window.location.href = "/tags-info";
+              }}
+              className="flex items-center gap-2 bg-purple-600 hover:bg-purple-500 text-white text-[12px] font-black px-4 py-2 rounded-xl transition-all shadow-lg hover:scale-105"
             >
               <span className="flex items-center justify-center w-5 h-5 bg-white/20 rounded-full text-[12px]">؟</span>
               معنى التصنيفات
-            </a>
+            </button>
           </div>
           
           {selectedCategories.length > 0 && (
@@ -122,6 +126,7 @@ export function GamesList() {
 
       {/* عرض الألعاب */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {/* ... (نفس كود عرض الألعاب السابق دون تغيير) */}
         {games.map((game) => (
           <div
             key={game._id}
@@ -131,7 +136,6 @@ export function GamesList() {
             <div className="aspect-[16/10] overflow-hidden relative">
               <img src={game.imageUrl} alt={game.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
               <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent opacity-90"></div>
-              
               <div className="absolute bottom-4 right-4 flex flex-wrap gap-1">
                 {game.categories.slice(0, 3).map((cat: string) => {
                   const tagInfo = categoriesWithDescriptions?.find(t => t.name === cat);
@@ -144,7 +148,6 @@ export function GamesList() {
                 })}
               </div>
             </div>
-
             <div className="p-6">
               <div className="flex justify-between items-start mb-2">
                 <h3 className="text-xl font-black text-white group-hover:text-purple-400 transition-colors">{game.title}</h3>
@@ -153,7 +156,6 @@ export function GamesList() {
                 )}
               </div>
               <p className="text-gray-400 text-xs leading-relaxed line-clamp-2 mb-6">{game.description}</p>
-              
               <div className="flex justify-between items-center border-t border-white/5 pt-4">
                 <span className="text-[10px] text-gray-500 font-bold uppercase">📅 {new Date(game._creationTime).toLocaleDateString('ar-SA')}</span>
                 <span className="text-[10px] text-purple-400 font-black tracking-widest uppercase">التفاصيل ←</span>
