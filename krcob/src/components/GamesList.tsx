@@ -62,7 +62,7 @@ export function GamesList() {
       </div>
 
       {/* 2. قسم التصفية الذكية */}
-      <div className="bg-black/20 backdrop-blur-md rounded-2xl p-6 border border-white/5 shadow-2xl relative overflow-visible">
+      <div className="bg-black/20 backdrop-blur-md rounded-2xl p-6 border border-white/5 shadow-2xl relative">
         <div className="flex justify-between items-center mb-8 pb-4 border-b border-white/5">
           <div className="flex items-center gap-4">
             <h3 className="text-xl font-black text-white flex items-center gap-3">
@@ -70,16 +70,21 @@ export function GamesList() {
               تصفية ذكية
             </h3>
 
-            {/* تم استخدام وسم <a> بسيط جداً مع منع أي تفاعل برمي آخر */}
-            <a 
-              href="/tags-info" 
-              onMouseDown={(e) => e.stopPropagation()} 
-              className="bg-purple-600 hover:bg-purple-500 text-white text-[11px] font-bold px-4 py-2 rounded-xl transition-all shadow-lg flex items-center gap-2"
-              style={{ zIndex: 9999, position: 'relative', display: 'flex' }}
+            {/* تم تحويله لـ button مع إجبار المتصفح على الانتقال وتغيير الحالة برمجياً */}
+            <button 
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                // هذا السطر سيجبر المتصفح على الذهاب للرابط مهما كانت المعوقات
+                window.location.assign("/tags-info");
+              }}
+              className="flex items-center gap-2 bg-[#6b21a8] hover:bg-[#7e22ce] text-white text-[11px] font-bold px-4 py-2 rounded-xl transition-all shadow-lg shadow-purple-900/40 border border-purple-500/30 cursor-pointer"
+              style={{ position: 'relative', zIndex: 100 }}
             >
               <span className="bg-white/20 w-5 h-5 flex items-center justify-center rounded-full text-[10px]">؟</span>
               معنى التصنيفات
-            </a>
+            </button>
           </div>
           
           {selectedCategories.length > 0 && (
@@ -140,7 +145,7 @@ export function GamesList() {
                   const tagInfo = categoriesWithDescriptions?.find(t => t.name === cat);
                   const theme = getGroupTheme(tagInfo?.group || "");
                   return (
-                    <span key={cat} className={`px-2 py-0.5 rounded text-[9px] font-black text-white ${theme.bg} backdrop-blur-md`}>
+                    <span key={cat} className={`px-2 py-0.5 rounded text-[9px] font-black text-white ${theme.bg} backdrop-blur-md shadow-sm`}>
                       {cat}
                     </span>
                   );
@@ -154,7 +159,7 @@ export function GamesList() {
                 {isAdmin && (
                   <button 
                     onClick={(e) => { e.stopPropagation(); setEditingGame(game); }} 
-                    className="opacity-0 group-hover:opacity-100 p-2 bg-white/10 rounded-lg hover:bg-purple-500"
+                    className="opacity-0 group-hover:opacity-100 p-2 bg-white/10 rounded-lg hover:bg-purple-500 transition-all"
                   >
                     ✏️
                   </button>
