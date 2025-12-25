@@ -62,21 +62,19 @@ export function GamesList() {
       </div>
 
       {/* قسم التصفية الذكية */}
-      <div className="bg-black/20 backdrop-blur-md rounded-2xl p-6 border border-white/5 shadow-2xl">
-        <div className="flex justify-between items-center mb-8 pb-4 border-b border-white/5">
-          <div className="flex items-center gap-6">
+      <div className="bg-black/20 backdrop-blur-md rounded-2xl p-6 border border-white/5 shadow-2xl relative">
+        <div className="flex flex-wrap justify-between items-center mb-8 pb-4 border-b border-white/5 gap-4">
+          <div className="flex items-center gap-4">
             <h3 className="text-xl font-black text-white flex items-center gap-3">
               <span className="p-2 bg-purple-500/20 rounded-lg text-purple-400 text-sm">⚡</span>
               تصفية ذكية
             </h3>
 
-            {/* زر معنى التصنيفات - نسخة طبق الأصل من العلوي */}
+            {/* الزر "النازل" من الأعلى بمواصفاته الكاملة ليعمل بشكل مستقل */}
             <a 
               href="/tags-info" 
-              onClick={(e) => {
-                e.stopPropagation();
-              }}
-              className="flex items-center gap-2 bg-[#6b21a8] hover:bg-[#7e22ce] text-white text-[11px] font-bold px-4 py-2 rounded-lg transition-all shadow-lg shadow-purple-900/40 border border-purple-500/30 active:scale-95"
+              className="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-500 text-white text-[11px] font-bold px-4 py-2 rounded-xl transition-all shadow-lg border border-purple-400/30"
+              style={{ textDecoration: 'none' }}
             >
               <span className="bg-white/20 w-5 h-5 flex items-center justify-center rounded-full text-[10px]">؟</span>
               معنى التصنيفات
@@ -93,6 +91,7 @@ export function GamesList() {
           )}
         </div>
 
+        {/* شبكة التصنيفات */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {Object.entries(groupedCategories).map(([groupName, tags]: [string, any]) => {
             const theme = getGroupTheme(groupName);
@@ -123,7 +122,7 @@ export function GamesList() {
         </div>
       </div>
 
-      {/* عرض بطاقات الألعاب */}
+      {/* عرض الألعاب */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {games.map((game) => (
           <div
@@ -171,7 +170,6 @@ export function GamesList() {
         ))}
       </div>
 
-      {/* النوافذ المنبثقة */}
       {selectedGameId && <GameDetailsModal gameId={selectedGameId} onClose={() => setSelectedGameId(null)} />}
       {editingGame && <EditGameModal game={editingGame} onClose={() => setEditingGame(null)} onSuccess={() => setEditingGame(null)} />}
     </div>
