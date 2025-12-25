@@ -5,8 +5,9 @@ import { toast } from "sonner";
 import { EditGameModal } from "./EditGameModal";
 import { GameDetailsModal } from "./GameDetailsModal";
 import { Id } from "../../convex/_generated/dataModel";
-// المسار المصحح للـ Build
 import { getGroupTheme } from "../lib/utils";
+// استيراد Link للتنقل بين الصفحات
+import { Link } from "react-router-dom"; 
 
 export function GamesList() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -62,20 +63,32 @@ export function GamesList() {
         </form>
       </div>
 
-      {/* قسم التصفية الذكية (تم إزالة زر معنى التصنيفات المكرر) */}
+      {/* قسم التصفية الذكية مع زر "معنى التصنيفات" المدمج */}
       <div className="bg-black/20 backdrop-blur-md rounded-2xl p-6 border border-white/5 shadow-2xl">
-        <div className="flex justify-between items-center mb-8">
-          <h3 className="text-xl font-black text-white flex items-center gap-3">
-            <span className="p-2 bg-purple-500/20 rounded-lg text-purple-400">⚡</span>
-            تصفية ذكية
-          </h3>
+        <div className="flex justify-between items-center mb-8 border-b border-white/5 pb-4">
+          <div className="flex items-center gap-4">
+            <h3 className="text-xl font-black text-white flex items-center gap-3">
+              <span className="p-2 bg-purple-500/20 rounded-lg text-purple-400 text-sm">⚡</span>
+              تصفية ذكية
+            </h3>
+            
+            <div className="h-4 w-[1px] bg-white/10"></div> {/* فاصل عمودي */}
+
+            <Link 
+              to="/tags-info" 
+              className="group flex items-center gap-2 text-xs font-bold text-gray-400 hover:text-purple-400 transition-all"
+            >
+              <span className="flex items-center justify-center w-5 h-5 rounded-full border border-gray-600 group-hover:border-purple-500 text-[10px]">❓</span>
+              معنى التصنيفات
+            </Link>
+          </div>
           
           {selectedCategories.length > 0 && (
             <button 
               onClick={() => setSelectedCategories([])} 
-              className="text-xs font-bold text-red-400 hover:text-red-300 transition-colors flex items-center gap-1 border-b border-red-400/20 pb-0.5"
+              className="text-[10px] font-black text-red-400 bg-red-400/10 px-3 py-1 rounded-full hover:bg-red-400 hover:text-white transition-all"
             >
-              ✕ إلغاء الفلاتر
+              إلغاء الكل ✕
             </button>
           )}
         </div>
@@ -110,7 +123,7 @@ export function GamesList() {
         </div>
       </div>
 
-      {/* عرض الألعاب */}
+      {/* عرض الألعاب كما هي */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {games.map((game) => (
           <div
@@ -127,7 +140,7 @@ export function GamesList() {
                   const tagInfo = categoriesWithDescriptions?.find(t => t.name === cat);
                   const theme = getGroupTheme(tagInfo?.group || "");
                   return (
-                    <span key={cat} className={`px-2 py-0.5 rounded text-[9px] font-black text-white ${theme.bg} backdrop-blur-md shadow-sm`}>
+                    <span key={cat} className={`px-2 py-0.5 rounded text-[9px] font-black text-white ${theme.bg} backdrop-blur-md`}>
                       {cat}
                     </span>
                   );
@@ -139,19 +152,14 @@ export function GamesList() {
               <div className="flex justify-between items-start mb-2">
                 <h3 className="text-xl font-black text-white group-hover:text-purple-400 transition-colors">{game.title}</h3>
                 {isAdmin && (
-                  <button 
-                    onClick={(e) => { e.stopPropagation(); setEditingGame(game); }} 
-                    className="opacity-0 group-hover:opacity-100 p-2 bg-white/10 rounded-lg hover:bg-purple-500 transition-all duration-300"
-                  >
-                    ✏️
-                  </button>
+                  <button onClick={(e) => { e.stopPropagation(); setEditingGame(game); }} className="opacity-0 group-hover:opacity-100 p-2 bg-white/10 rounded-lg">✏️</button>
                 )}
               </div>
               <p className="text-gray-400 text-xs leading-relaxed line-clamp-2 mb-6">{game.description}</p>
               
               <div className="flex justify-between items-center border-t border-white/5 pt-4">
                 <span className="text-[10px] text-gray-500 font-bold uppercase">📅 {new Date(game._creationTime).toLocaleDateString('ar-SA')}</span>
-                <span className="text-[10px] text-purple-400 font-black tracking-widest uppercase group-hover:translate-x-[-4px] transition-transform">التفاصيل ←</span>
+                <span className="text-[10px] text-purple-400 font-black tracking-widest uppercase">التفاصيل ←</span>
               </div>
             </div>
           </div>
