@@ -7,6 +7,7 @@ import { TagWithDescription } from "./TagWithDescription";
 import { CategoriesInfoModal } from "./CategoriesInfoModal";
 import { GameDetailsModal } from "./GameDetailsModal";
 import { Id } from "../../convex/_generated/dataModel";
+import { getGroupTheme } from "../../lib/utils"; // استيراد دالة الألوان
 
 export function GamesList() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -24,58 +25,23 @@ export function GamesList() {
   const removeGame = useMutation(api.games.remove);
   const isAdmin = useQuery(api.games.checkAdminStatus);
 
-  // تنظيم التاقات في مجموعات برمجياً لسهولة العرض
   const groupedCategories = useMemo(() => {
     if (!categoriesWithDescriptions) return {};
     return categoriesWithDescriptions.reduce((acc: any, tag) => {
-      const group = tag.group || "تصنيفات أخرى";
+      const group = tag.group || "أخرى";
       if (!acc[group]) acc[group] = [];
       acc[group].push(tag);
       return acc;
     }, {});
   }, [categoriesWithDescriptions]);
 
-  const handleRemoveGame = async (gameId: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (confirm("هل أنت متأكد من حذف هذه اللعبة؟")) {
-      try {
-        await removeGame({ id: gameId as any });
-        toast.success("تم حذف اللعبة بنجاح");
-      } catch (error) {
-        toast.error("حدث خطأ أثناء حذف اللعبة");
-      }
-    }
-  };
-
-  const handleEditGame = (game: any, e: React.MouseEvent) => {
-    e.stopPropagation();
-    setEditingGame(game);
-  };
-
   const toggleCategory = (category: string) => {
     setSelectedCategories(prev => 
-      prev.includes(category)
-        ? prev.filter(c => c !== category)
-        : [...prev, category]
+      prev.includes(category) ? prev.filter(c => c !== category) : [...prev, category]
     );
   };
 
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setActualSearchQuery(searchQuery);
-  };
-
-  const handleSearchKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      setActualSearchQuery(searchQuery);
-    }
-  };
-
-  const handleGameClick = (gameId: Id<"games">) => {
-    setSelectedGameId(gameId);
-  };
-
-  if (games === undefined || categoriesWithDescriptions === undefined || isAdmin === undefined) {
+  if (games === undefined || categoriesWithDescriptions === undefined) {
     return (
       <div className="flex justify-center items-center py-12">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-400"></div>
@@ -83,212 +49,116 @@ export function GamesList() {
     );
   }
 
-  const filteredGames = games.filter((game) => {
-    if (selectedCategories.length === 0) return true;
-    return selectedCategories.every((selectedCat) => 
-      game.categories.includes(selectedCat)
-    );
-  });
-
   return (
-    <div className="space-y-6" dir="rtl">
+    <div className="space-y-8" dir="rtl">
       {/* Search Bar */}
-      <div className="bg-black/20 backdrop-blur-md rounded-xl p-6 border border-white/10">
-        <h3 className="text-xl font-bold text-white mb-4">البحث في الألعاب</h3>
-        <form onSubmit={handleSearchSubmit} className="relative">
+      <div className="bg-black/20 backdrop-blur-md rounded-2xl p-6 border border-white/5 shadow-2xl">
+        <form onSubmit={(e) => { e.preventDefault(); setActualSearchQuery(searchQuery); }} className="relative">
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            onKeyPress={handleSearchKeyPress}
-            placeholder="ابحث عن اسم اللعبة واضغط Enter..."
-            className="w-full px-4 py-3 pr-4 pl-20 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:border-purple-400 focus:ring-1 focus:ring-purple-400 outline-none transition-all"
+            placeholder="ابحث عن تحدي جديد..."
+            className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:border-purple-500/50 focus:ring-0 outline-none transition-all"
           />
-          <button
-            type="submit"
-            className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-1.5 rounded-lg text-sm transition-colors font-bold"
-          >
-            بحث
-          </button>
+          <button type="submit" className="absolute left-3 top-1/2 -translate-y-1/2 bg-purple-600 hover:bg-purple-500 text-white px-6 py-2 rounded-lg font-black transition-all">بحث</button>
         </form>
-        {actualSearchQuery && (
-          <div className="mt-3 flex items-center gap-2">
-            <span className="text-sm text-purple-200">البحث عن: "{actualSearchQuery}"</span>
-            <button
-              onClick={() => {
-                setActualSearchQuery("");
-                setSearchQuery("");
-              }}
-              className="text-red-400 hover:text-red-300 text-sm"
-            >
-              ✕ مسح البحث
-            </button>
-          </div>
-        )}
       </div>
 
-      {/* Category Filter - Organized by Groups */}
-      <div className="bg-black/20 backdrop-blur-md rounded-xl p-6 border border-white/10 shadow-xl">
-        <div className="flex justify-between items-center mb-6">
-          <h3 className="text-xl font-bold text-white flex items-center gap-2">
-            <span className="text-2xl">🏷️</span> 
-            تصفية متقدمة
+      {/* Advanced Filter with Group Colors */}
+      <div className="bg-black/20 backdrop-blur-md rounded-2xl p-6 border border-white/5 shadow-2xl">
+        <div className="flex justify-between items-center mb-8">
+          <h3 className="text-xl font-black text-white flex items-center gap-3">
+            <span className="p-2 bg-purple-500/20 rounded-lg text-purple-400">⚡</span>
+            تصفية ذكية
           </h3>
-          <div className="flex gap-2">
-            {selectedCategories.length > 0 && (
-              <button
-                onClick={() => setSelectedCategories([])}
-                className="bg-red-500/20 text-red-400 border border-red-500/50 px-4 py-2 rounded-lg font-bold transition-all text-sm hover:bg-red-500/30"
-              >
-                مسح التصنيفات
-              </button>
-            )}
-            <button
-              onClick={() => setShowCategoriesInfo(true)}
-              className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-semibold transition-all text-sm"
-            >
-              معنى التصنيفات
-            </button>
-          </div>
+          {selectedCategories.length > 0 && (
+            <button onClick={() => setSelectedCategories([])} className="text-xs font-bold text-red-400 hover:underline">مسح الكل</button>
+          )}
         </div>
 
-        {/* عرض المجموعات المقسمة */}
-        <div className="space-y-8">
-          {Object.entries(groupedCategories).map(([groupName, tags]: [string, any]) => (
-            <div key={groupName} className="group-section">
-              <h4 className="text-sm font-bold text-purple-400 mb-3 flex items-center gap-2 opacity-80 uppercase tracking-widest">
-                <span className="w-2 h-2 bg-purple-500 rounded-full shadow-[0_0_8px_#a855f7]"></span>
-                {groupName}
-              </h4>
-              <div className="flex flex-wrap gap-2">
-                {tags.map((tag: any) => (
-                  <TagWithDescription
-                    key={tag._id}
-                    name={tag.name}
-                    description={tag.description}
-                    isSelected={selectedCategories.includes(tag.name)}
-                    onClick={() => toggleCategory(tag.name)}
-                    showDoubleClickHint={isAdmin}
-                    className={`transition-all duration-300 transform hover:scale-105 cursor-pointer ${
-                      selectedCategories.includes(tag.name)
-                        ? "!bg-purple-600 !text-white !border-purple-400 shadow-lg"
-                        : "!bg-white/5 !text-purple-200/70 !border-white/5 hover:!border-purple-500/30 hover:!bg-white/10"
-                    }`}
-                  />
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Games Grid */}
-      {filteredGames.length === 0 ? (
-        <div className="text-center py-20 bg-black/10 rounded-xl border border-dashed border-white/10">
-          <div className="text-6xl mb-4 opacity-50">🎮</div>
-          <h3 className="text-2xl font-bold text-white mb-2">لا توجد نتائج</h3>
-          <p className="text-purple-200 opacity-70">
-            جرب تغيير معايير البحث أو مسح التصنيفات المختارة
-          </p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredGames.map((game) => {
-            const totalImages = 1 + (game.additionalImages?.length || 0);
-            const totalVideos = (game.videoUrl ? 1 : 0) + (game.additionalVideos?.length || 0);
-            
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {Object.entries(groupedCategories).map(([groupName, tags]: [string, any]) => {
+            const theme = getGroupTheme(groupName);
             return (
-              <div
-                key={game._id}
-                onClick={() => handleGameClick(game._id)}
-                className="bg-black/30 backdrop-blur-md rounded-xl overflow-hidden border border-white/10 hover:border-purple-400/50 transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/20 cursor-pointer group"
-              >
-                {/* Image Section */}
-                <div className="aspect-video bg-gray-800 relative overflow-hidden">
-                  {game.imageUrl ? (
-                    <img
-                      src={game.imageUrl}
-                      alt={game.title}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-400 text-4xl">🎮</div>
-                  )}
-                  
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center p-4">
-                    <span className="text-white font-bold text-sm bg-purple-600/80 px-4 py-2 rounded-full backdrop-blur-sm">عرض التفاصيل</span>
-                  </div>
-
-                  <div className="absolute top-2 right-2 flex gap-1">
-                    {totalVideos > 0 && (
-                      <div className="bg-red-600 text-white px-2 py-1 rounded text-[10px] font-bold flex items-center gap-1 shadow-lg">
-                        <span>📹</span> {totalVideos}
-                      </div>
-                    )}
-                    {totalImages > 1 && (
-                      <div className="bg-blue-600 text-white px-2 py-1 rounded text-[10px] font-bold flex items-center gap-1 shadow-lg">
-                        <span>🖼️</span> {totalImages}
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Content Section */}
-                <div className="p-5">
-                  <div className="flex justify-between items-start mb-3">
-                    <h3 className="text-lg font-bold text-white line-clamp-1 group-hover:text-purple-400 transition-colors">
-                      {game.title}
-                    </h3>
-                    {isAdmin && (
-                      <div className="flex gap-2">
-                        <button onClick={(e) => handleEditGame(game, e)} className="hover:scale-125 transition-transform">✏️</button>
-                        <button onClick={(e) => handleRemoveGame(game._id, e)} className="hover:scale-125 transition-transform">🗑️</button>
-                      </div>
-                    )}
-                  </div>
-                  
-                  <div className="mb-3 flex flex-wrap gap-1">
-                    {game.categories.map((category: string, index: number) => (
-                      <span key={index} className="bg-purple-600/20 text-purple-300 border border-purple-500/20 px-2 py-0.5 rounded text-[10px] font-medium">
-                        {category}
-                      </span>
-                    ))}
-                  </div>
-                  
-                  <p className="text-gray-400 text-xs mb-4 line-clamp-2 h-8">
-                    {game.description}
-                  </p>
-                  
-                  <div className="flex justify-between items-center text-[10px] text-gray-500 pt-3 border-t border-white/5">
-                    <span>👤 {game.createdByName || "مدير"}</span>
-                    <span>📅 {new Date(game._creationTime).toLocaleDateString('ar-SA')}</span>
-                  </div>
+              <div key={groupName} className="space-y-4">
+                <h4 className={`text-[10px] font-black uppercase tracking-[0.2em] ${theme.text} mb-2 flex items-center gap-2`}>
+                  <span className={`w-1.5 h-1.5 rounded-full ${theme.bg.replace('bg-', 'bg-')}`}></span>
+                  {groupName.split(' (')[0]}
+                </h4>
+                <div className="flex flex-wrap gap-2">
+                  {tags.map((tag: any) => (
+                    <button
+                      key={tag._id}
+                      onClick={() => toggleCategory(tag.name)}
+                      className={`px-3 py-1.5 rounded-md text-[11px] font-bold transition-all border ${
+                        selectedCategories.includes(tag.name)
+                          ? `${theme.bg} border-transparent text-white ${theme.shadow} scale-105`
+                          : `bg-white/5 border-white/10 text-gray-400 hover:border-white/20`
+                      }`}
+                    >
+                      {tag.name}
+                    </button>
+                  ))}
                 </div>
               </div>
             );
           })}
         </div>
-      )}
+      </div>
+
+      {/* Games Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {games.map((game) => (
+          <div
+            key={game._id}
+            onClick={() => setSelectedGameId(game._id)}
+            className="group relative bg-white/5 rounded-2xl overflow-hidden border border-white/10 hover:border-purple-500/50 transition-all duration-500 hover:-translate-y-2 cursor-pointer shadow-xl"
+          >
+            {/* Image Wrapper */}
+            <div className="aspect-[16/10] overflow-hidden relative">
+              <img src={game.imageUrl} alt={game.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent opacity-90"></div>
+              
+              {/* Floating Tags on Image */}
+              <div className="absolute bottom-4 right-4 flex flex-wrap gap-1">
+                {game.categories.slice(0, 3).map((cat: string) => {
+                  const tagInfo = categoriesWithDescriptions?.find(t => t.name === cat);
+                  const theme = getGroupTheme(tagInfo?.group || "");
+                  return (
+                    <span key={cat} className={`px-2 py-0.5 rounded text-[9px] font-black text-white ${theme.bg} backdrop-blur-md`}>
+                      {cat}
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="p-6">
+              <div className="flex justify-between items-start mb-2">
+                <h3 className="text-xl font-black text-white group-hover:text-purple-400 transition-colors">{game.title}</h3>
+                {isAdmin && (
+                  <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button onClick={(e) => { e.stopPropagation(); setEditingGame(game); }} className="text-lg">✏️</button>
+                  </div>
+                )}
+              </div>
+              <p className="text-gray-400 text-xs leading-relaxed line-clamp-2 mb-6">{game.description}</p>
+              
+              <div className="flex justify-between items-center border-t border-white/5 pt-4">
+                <span className="text-[10px] text-gray-500 font-bold">📅 {new Date(game._creationTime).toLocaleDateString('ar-SA')}</span>
+                <span className="text-[10px] text-purple-400 font-black tracking-widest uppercase">التفاصيل ←</span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
 
       {/* Modals */}
-      {selectedGameId && (
-        <GameDetailsModal gameId={selectedGameId} onClose={() => setSelectedGameId(null)} />
-      )}
-
-      {editingGame && (
-        <EditGameModal
-          game={editingGame}
-          onClose={() => setEditingGame(null)}
-          onSuccess={() => {
-            setEditingGame(null);
-            toast.success("تم تحديث اللعبة بنجاح");
-          }}
-        />
-      )}
-
-      {showCategoriesInfo && (
-        <CategoriesInfoModal onClose={() => setShowCategoriesInfo(false)} />
-      )}
+      {selectedGameId && <GameDetailsModal gameId={selectedGameId} onClose={() => setSelectedGameId(null)} />}
+      {editingGame && <EditGameModal game={editingGame} onClose={() => setEditingGame(null)} onSuccess={() => setEditingGame(null)} />}
+      {showCategoriesInfo && <CategoriesInfoModal onClose={() => setShowCategoriesInfo(false)} />}
     </div>
   );
 }
