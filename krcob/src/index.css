@@ -4,10 +4,15 @@
 @tailwind components;
 @tailwind utilities;
 
-
 :root {
   --color-light: #ffffff;
   --color-dark: #171717;
+}
+
+/* التعديل الجوهري لرفع الحجم بنسبة 125% تقريباً */
+html {
+  font-size: 19px; /* القيمة الافتراضية للمتصفحات هي 16px، رفعها لـ 19px يعطيك شعور التكبير */
+  scroll-behavior: smooth;
 }
 
 .accent-text {
@@ -19,16 +24,26 @@ body {
   color: var(--color-dark);
   background: var(--color-light);
   direction: rtl;
+  /* تحسين تباعد الأسطر لراحة العين */
+  line-height: 1.8; 
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* only use this to update the style of the auth input fields. use a different class for all other input fields */
+/* تعديل حجم الخطوط الافتراضية لتكون أوضح */
+h1, h2, h3, h4, h5, h6 {
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+}
+
+/* auth input fields */
 .auth-input-field {
-  @apply w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-gray-400 focus:border-purple-400 focus:ring-1 focus:ring-purple-400 outline-none transition-all;
+  @apply w-full px-5 py-4 rounded-xl bg-white/10 border border-white/20 text-white placeholder-gray-400 focus:border-purple-400 focus:ring-1 focus:ring-purple-400 outline-none transition-all text-lg;
 }
 
-/* only use this to update the style of the auth buttons. use the button class for all other buttons */
+/* auth buttons */
 .auth-button {
-  @apply w-full px-4 py-3 rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed;
+  @apply w-full px-5 py-4 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed text-lg;
 }
 
 /* Line clamp utilities */
@@ -46,19 +61,21 @@ body {
   overflow: hidden;
 }
 
-/* Custom scrollbar */
+/* Custom scrollbar - جعلناه أعرض قليلاً ليتناسب مع الحجم الجديد */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 5px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(147, 51, 234, 0.5);
-  border-radius: 4px;
+  background: linear-gradient(to bottom, rgba(147, 51, 234, 0.4), rgba(79, 70, 229, 0.4));
+  border-radius: 5px;
+  border: 2px solid transparent;
+  background-clip: content-box;
 }
 
 ::-webkit-scrollbar-thumb:hover {
