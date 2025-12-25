@@ -2,7 +2,6 @@ import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
 
-// Admin codes with their corresponding names
 const ADMIN_CODES = {
   "AD5d(9&F4EzU": "Krcob",
   "9z657E8jjMF": "y._u", 
@@ -37,28 +36,23 @@ export const list = query({
 export const add = mutation({
   args: {
     name: v.string(),
-    group: v.string(), // إضافة حقل المجموعة هنا
+    group: v.string(), // تعديل: إضافة الـ validator
     description: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const adminInfo = await getAdminInfo(ctx);
-    if (!adminInfo) {
-      throw new Error("غير مصرح لك بإضافة التصنيفات");
-    }
+    if (!adminInfo) throw new Error("غير مصرح لك بإضافة التصنيفات");
 
-    // Check if tag already exists
     const existingTag = await ctx.db
       .query("tags")
       .filter((q) => q.eq(q.field("name"), args.name))
       .first();
 
-    if (existingTag) {
-      throw new Error("هذا التصنيف موجود بالفعل");
-    }
+    if (existingTag) throw new Error("هذا التصنيف موجود بالفعل");
 
     return await ctx.db.insert("tags", {
       name: args.name,
-      group: args.group, // تخزين المجموعة في قاعدة البيانات
+      group: args.group, // تعديل: تخزين المجموعة
       description: args.description,
       createdBy: adminInfo.userId,
       createdByName: adminInfo.adminName,
@@ -70,36 +64,16 @@ export const update = mutation({
   args: {
     id: v.id("tags"),
     name: v.string(),
-    group: v.string(), // إضافة حقل المجموعة هنا أيضاً للتعديل
+    group: v.string(), // تعديل: إضافة الـ validator للتحديث
     description: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const adminInfo = await getAdminInfo(ctx);
-    if (!adminInfo) {
-      throw new Error("غير مصرح لك بتعديل التصنيفات");
-    }
-
-    const existingTag = await ctx.db.get(args.id);
-    if (!existingTag) {
-      throw new Error("التصنيف غير موجود");
-    }
-
-    // Check if another tag with the same name exists
-    const duplicateTag = await ctx.db
-      .query("tags")
-      .filter((q) => q.and(
-        q.eq(q.field("name"), args.name),
-        q.neq(q.field("_id"), args.id)
-      ))
-      .first();
-
-    if (duplicateTag) {
-      throw new Error("يوجد تصنيف آخر بنفس الاسم");
-    }
+    if (!adminInfo) throw new Error("غير مصرح لك بتعديل التصنيفات");
 
     return await ctx.db.patch(args.id, {
       name: args.name,
-      group: args.group, // تحديث المجموعة
+      group: args.group, // تعديل: تحديث المجموعة
       description: args.description,
       updatedAt: Date.now(),
       updatedBy: adminInfo.userId,
@@ -112,24 +86,15 @@ export const remove = mutation({
   args: { id: v.id("tags") },
   handler: async (ctx, args) => {
     const adminInfo = await getAdminInfo(ctx);
-    if (!adminInfo) {
-      throw new Error("غير مصرح لك بحذف التصنيفات");
-    }
+    if (!adminInfo) throw new Error("غير مصرح لك بحذف التصنيفات");
 
     const tag = await ctx.db.get(args.id);
-    if (!tag) {
-      throw new Error("التصنيف غير موجود");
-    }
+    if (!tag) throw new Error("التصنيف غير موجود");
 
-    // Check if any games use this tag
     const allGames = await ctx.db.query("games").collect();
-    const gamesWithTag = allGames.find(game => 
-      game.categories.includes(tag.name)
-    );
+    const isUsed = allGames.some(game => game.categories.includes(tag.name));
 
-    if (gamesWithTag) {
-      throw new Error("لا يمكن حذف هذا التصنيف لأنه مستخدم في بعض الألعاب");
-    }
+    if (isUsed) throw new Error("لا يمكن حذف هذا التصنيف لأنه مستخدم في بعض الألعاب");
 
     return await ctx.db.delete(args.id);
   },
