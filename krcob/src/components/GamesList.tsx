@@ -3,11 +3,9 @@ import { api } from "../../convex/_generated/api";
 import { useState, useMemo } from "react";
 import { toast } from "sonner";
 import { EditGameModal } from "./EditGameModal";
-import { TagWithDescription } from "./TagWithDescription";
-import { CategoriesInfoModal } from "./CategoriesInfoModal";
 import { GameDetailsModal } from "./GameDetailsModal";
 import { Id } from "../../convex/_generated/dataModel";
-// التصحيح هنا: استخدام "../" للوصول لملد lib من داخل components
+// المسار المصحح للـ Build
 import { getGroupTheme } from "../lib/utils";
 
 export function GamesList() {
@@ -15,7 +13,6 @@ export function GamesList() {
   const [searchQuery, setSearchQuery] = useState("");
   const [actualSearchQuery, setActualSearchQuery] = useState("");
   const [editingGame, setEditingGame] = useState<any>(null);
-  const [showCategoriesInfo, setShowCategoriesInfo] = useState(false);
   const [selectedGameId, setSelectedGameId] = useState<Id<"games"> | null>(null);
   
   const games = useQuery(api.games.list, { 
@@ -23,7 +20,6 @@ export function GamesList() {
     searchQuery: actualSearchQuery.trim() || undefined
   });
   const categoriesWithDescriptions = useQuery(api.games.getCategoriesWithDescriptions);
-  const removeGame = useMutation(api.games.remove);
   const isAdmin = useQuery(api.games.checkAdminStatus);
 
   const groupedCategories = useMemo(() => {
@@ -66,19 +62,22 @@ export function GamesList() {
         </form>
       </div>
 
-      {/* قسم التصفية الملونة */}
+      {/* قسم التصفية الذكية (تم إزالة زر معنى التصنيفات المكرر) */}
       <div className="bg-black/20 backdrop-blur-md rounded-2xl p-6 border border-white/5 shadow-2xl">
         <div className="flex justify-between items-center mb-8">
           <h3 className="text-xl font-black text-white flex items-center gap-3">
             <span className="p-2 bg-purple-500/20 rounded-lg text-purple-400">⚡</span>
             تصفية ذكية
           </h3>
-          <div className="flex gap-4">
-            {selectedCategories.length > 0 && (
-              <button onClick={() => setSelectedCategories([])} className="text-xs font-bold text-red-400 hover:underline">مسح الكل</button>
-            )}
-            <button onClick={() => setShowCategoriesInfo(true)} className="text-xs font-bold text-purple-400 hover:underline">معنى التصنيفات</button>
-          </div>
+          
+          {selectedCategories.length > 0 && (
+            <button 
+              onClick={() => setSelectedCategories([])} 
+              className="text-xs font-bold text-red-400 hover:text-red-300 transition-colors flex items-center gap-1 border-b border-red-400/20 pb-0.5"
+            >
+              ✕ إلغاء الفلاتر
+            </button>
+          )}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -98,7 +97,7 @@ export function GamesList() {
                       className={`px-3 py-1.5 rounded-md text-[11px] font-bold transition-all border ${
                         selectedCategories.includes(tag.name)
                           ? `${theme.bg} border-transparent text-white ${theme.shadow} scale-105`
-                          : `bg-white/5 border-white/10 text-gray-400 hover:border-white/20`
+                          : `bg-white/5 border-white/10 text-gray-400 hover:border-white/20 hover:bg-white/10`
                       }`}
                     >
                       {tag.name}
@@ -119,7 +118,6 @@ export function GamesList() {
             onClick={() => setSelectedGameId(game._id)}
             className="group relative bg-white/5 rounded-2xl overflow-hidden border border-white/10 hover:border-purple-500/50 transition-all duration-500 hover:-translate-y-2 cursor-pointer shadow-xl"
           >
-            {/* غلاف اللعبة */}
             <div className="aspect-[16/10] overflow-hidden relative">
               <img src={game.imageUrl} alt={game.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
               <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent opacity-90"></div>
@@ -129,7 +127,7 @@ export function GamesList() {
                   const tagInfo = categoriesWithDescriptions?.find(t => t.name === cat);
                   const theme = getGroupTheme(tagInfo?.group || "");
                   return (
-                    <span key={cat} className={`px-2 py-0.5 rounded text-[9px] font-black text-white ${theme.bg} backdrop-blur-md`}>
+                    <span key={cat} className={`px-2 py-0.5 rounded text-[9px] font-black text-white ${theme.bg} backdrop-blur-md shadow-sm`}>
                       {cat}
                     </span>
                   );
@@ -137,21 +135,23 @@ export function GamesList() {
               </div>
             </div>
 
-            {/* تفاصيل البطاقة */}
             <div className="p-6">
               <div className="flex justify-between items-start mb-2">
                 <h3 className="text-xl font-black text-white group-hover:text-purple-400 transition-colors">{game.title}</h3>
                 {isAdmin && (
-                  <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button onClick={(e) => { e.stopPropagation(); setEditingGame(game); }} className="text-lg">✏️</button>
-                  </div>
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); setEditingGame(game); }} 
+                    className="opacity-0 group-hover:opacity-100 p-2 bg-white/10 rounded-lg hover:bg-purple-500 transition-all duration-300"
+                  >
+                    ✏️
+                  </button>
                 )}
               </div>
               <p className="text-gray-400 text-xs leading-relaxed line-clamp-2 mb-6">{game.description}</p>
               
               <div className="flex justify-between items-center border-t border-white/5 pt-4">
-                <span className="text-[10px] text-gray-500 font-bold">📅 {new Date(game._creationTime).toLocaleDateString('ar-SA')}</span>
-                <span className="text-[10px] text-purple-400 font-black tracking-widest uppercase">التفاصيل ←</span>
+                <span className="text-[10px] text-gray-500 font-bold uppercase">📅 {new Date(game._creationTime).toLocaleDateString('ar-SA')}</span>
+                <span className="text-[10px] text-purple-400 font-black tracking-widest uppercase group-hover:translate-x-[-4px] transition-transform">التفاصيل ←</span>
               </div>
             </div>
           </div>
@@ -161,7 +161,6 @@ export function GamesList() {
       {/* النوافذ المنبثقة */}
       {selectedGameId && <GameDetailsModal gameId={selectedGameId} onClose={() => setSelectedGameId(null)} />}
       {editingGame && <EditGameModal game={editingGame} onClose={() => setEditingGame(null)} onSuccess={() => setEditingGame(null)} />}
-      {showCategoriesInfo && <CategoriesInfoModal onClose={() => setShowCategoriesInfo(false)} />}
     </div>
   );
 }
