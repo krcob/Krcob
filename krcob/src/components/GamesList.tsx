@@ -4,6 +4,7 @@ import { useState, useMemo } from "react";
 import { toast } from "sonner";
 import { EditGameModal } from "./EditGameModal";
 import { GameDetailsModal } from "./GameDetailsModal";
+import { TagsInfoModal } from "./TagsInfoModal"; // تأكد من وجود هذا الملف أو استبدله بالاسم الصحيح للنافذة
 import { Id } from "../../convex/_generated/dataModel";
 import { getGroupTheme } from "../lib/utils";
 
@@ -13,6 +14,7 @@ export function GamesList() {
   const [actualSearchQuery, setActualSearchQuery] = useState("");
   const [editingGame, setEditingGame] = useState<any>(null);
   const [selectedGameId, setSelectedGameId] = useState<Id<"games"> | null>(null);
+  const [showTagsInfo, setShowTagsInfo] = useState(false); // الحالة الجديدة لفتح النافذة
   
   const games = useQuery(api.games.list, { 
     categories: selectedCategories.length > 0 ? selectedCategories : undefined,
@@ -70,17 +72,15 @@ export function GamesList() {
               تصفية ذكية
             </h3>
 
-            {/* تم تحويله لـ button مع إجبار المتصفح على الانتقال وتغيير الحالة برمجياً */}
+            {/* الزر الآن يقوم بفتح النافذة برمجياً بدلاً من تغيير الرابط */}
             <button 
               type="button"
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                // هذا السطر سيجبر المتصفح على الذهاب للرابط مهما كانت المعوقات
-                window.location.assign("/tags-info");
+                setShowTagsInfo(true); // يفتح النافذة فوراً
               }}
-              className="flex items-center gap-2 bg-[#6b21a8] hover:bg-[#7e22ce] text-white text-[11px] font-bold px-4 py-2 rounded-xl transition-all shadow-lg shadow-purple-900/40 border border-purple-500/30 cursor-pointer"
-              style={{ position: 'relative', zIndex: 100 }}
+              className="flex items-center gap-2 bg-[#6b21a8] hover:bg-[#7e22ce] text-white text-[11px] font-bold px-4 py-2 rounded-xl transition-all shadow-lg border border-purple-500/30 cursor-pointer"
             >
               <span className="bg-white/20 w-5 h-5 flex items-center justify-center rounded-full text-[10px]">؟</span>
               معنى التصنيفات
@@ -139,7 +139,6 @@ export function GamesList() {
             <div className="aspect-[16/10] overflow-hidden relative">
               <img src={game.imageUrl} alt={game.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
               <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent opacity-90"></div>
-              
               <div className="absolute bottom-4 right-4 flex flex-wrap gap-1">
                 {game.categories.slice(0, 3).map((cat: string) => {
                   const tagInfo = categoriesWithDescriptions?.find(t => t.name === cat);
@@ -152,32 +151,24 @@ export function GamesList() {
                 })}
               </div>
             </div>
-
             <div className="p-6">
-              <div className="flex justify-between items-start mb-2">
-                <h3 className="text-xl font-black text-white group-hover:text-purple-400 transition-colors">{game.title}</h3>
-                {isAdmin && (
-                  <button 
-                    onClick={(e) => { e.stopPropagation(); setEditingGame(game); }} 
-                    className="opacity-0 group-hover:opacity-100 p-2 bg-white/10 rounded-lg hover:bg-purple-500 transition-all"
-                  >
-                    ✏️
-                  </button>
-                )}
-              </div>
+              <h3 className="text-xl font-black text-white mb-2 group-hover:text-purple-400 transition-colors">{game.title}</h3>
               <p className="text-gray-400 text-xs leading-relaxed line-clamp-2 mb-6">{game.description}</p>
-              
               <div className="flex justify-between items-center border-t border-white/5 pt-4">
-                <span className="text-[10px] text-gray-500 font-bold uppercase">📅 {new Date(game._creationTime).toLocaleDateString('ar-SA')}</span>
-                <span className="text-[10px] text-purple-400 font-black tracking-widest uppercase">التفاصيل ←</span>
+                <span className="text-[10px] text-gray-500 font-bold">📅 {new Date(game._creationTime).toLocaleDateString('ar-SA')}</span>
+                <span className="text-[10px] text-purple-400 font-black">التفاصيل ←</span>
               </div>
             </div>
           </div>
         ))}
       </div>
 
+      {/* النوافذ المنبثقة */}
       {selectedGameId && <GameDetailsModal gameId={selectedGameId} onClose={() => setSelectedGameId(null)} />}
       {editingGame && <EditGameModal game={editingGame} onClose={() => setEditingGame(null)} onSuccess={() => setEditingGame(null)} />}
+      
+      {/* استدعاء نافذة معاني التصنيفات عند الضغط على الزر الجديد */}
+      {showTagsInfo && <TagsInfoModal onClose={() => setShowTagsInfo(false)} />}
     </div>
   );
 }
