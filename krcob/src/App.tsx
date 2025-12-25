@@ -4,7 +4,6 @@ import { GamesList } from "./components/GamesList";
 import { AddGameForm } from "./components/AddGameForm";
 import { TagManagement } from "./components/TagManagement";
 import { AdminLoginModal } from "./components/AdminLoginModal";
-// استيراد المكون الجديد (تأكد من إنشاء ملف TagsInfo.tsx في مجلد components)
 import TagsInfo from "./components/TagsInfo"; 
 import { useState } from "react";
 import { useQuery } from "convex/react";
@@ -12,7 +11,6 @@ import { api } from "../convex/_generated/api";
 import { Toaster } from "sonner";
 
 function App() {
-  // أضفنا "tags-info" كحالة جديدة للتبويبات
   const [activeTab, setActiveTab] = useState<"games" | "add" | "tags" | "tags-info">("games");
   const [showAdminLogin, setShowAdminLogin] = useState(false);
   const isAdmin = useQuery(api.games.checkAdminStatus);
@@ -34,30 +32,19 @@ function App() {
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
-          {/* الأزرار العلوية */}
           <div className="flex justify-start gap-3 flex-wrap mb-6">
-            <button
-              onClick={openDiscord}
-              className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-4 py-2 rounded-lg font-semibold transition-all duration-200 shadow-lg hover:shadow-xl flex items-center gap-2 text-sm"
-            >
+            <button onClick={openDiscord} className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-4 py-2 rounded-lg font-semibold transition-all duration-200 shadow-lg flex items-center gap-2 text-sm">
               حياك! العب معنا
             </button>
 
-            <button
-              onClick={openYouTube}
-              className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-4 py-2 rounded-lg font-semibold transition-all duration-200 shadow-lg hover:shadow-xl flex items-center gap-2 text-sm"
-            >
+            <button onClick={openYouTube} className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-4 py-2 rounded-lg font-semibold transition-all duration-200 shadow-lg flex items-center gap-2 text-sm">
               قناة اليوتيوب
             </button>
 
-            <button
-              onClick={openSupport}
-              className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-4 py-2 rounded-lg font-semibold transition-all duration-200 shadow-lg hover:shadow-xl flex items-center gap-2 text-sm"
-            >
+            <button onClick={openSupport} className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-4 py-2 rounded-lg font-semibold transition-all duration-200 shadow-lg flex items-center gap-2 text-sm">
               ادعمنا
             </button>
 
-            {/* زر "معنى التصنيفات" - متاح للجميع */}
             <button
               onClick={() => setActiveTab("tags-info")}
               className={`px-4 py-2 rounded-lg font-semibold transition-all duration-200 shadow-lg flex items-center gap-2 text-sm ${
@@ -70,10 +57,7 @@ function App() {
             </button>
             
             <Unauthenticated>
-              <button
-                onClick={() => setShowAdminLogin(true)}
-                className="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white px-4 py-2 rounded-lg font-semibold transition-all duration-200 shadow-lg hover:shadow-xl flex items-center gap-2 text-sm"
-              >
+              <button onClick={() => setShowAdminLogin(true)} className="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white px-4 py-2 rounded-lg font-semibold transition-all duration-200 shadow-lg text-sm">
                 🔐 دخول الإدارة
               </button>
             </Unauthenticated>
@@ -83,41 +67,24 @@ function App() {
             </Authenticated>
           </div>
 
-          {/* العنوان الرئيسي */}
           <div className="text-center cursor-pointer" onClick={() => setActiveTab("games")}>
             <h1 className="text-4xl font-bold text-white mb-2">🎮 مكتبة الألعاب</h1>
             <p className="text-purple-200">اكتشف وشارك أفضل الألعاب</p>
           </div>
         </div>
 
-        {/* أزرار التحكم للمسؤول فقط */}
         <Authenticated>
           {isAdmin && (
             <div className="flex justify-center mb-8">
               <div className="bg-black/20 backdrop-blur-md rounded-xl p-2 border border-white/10">
                 <div className="flex gap-2">
-                  <button
-                    onClick={() => setActiveTab("games")}
-                    className={`px-6 py-3 rounded-lg font-semibold transition-all duration-200 ${
-                      activeTab === "games" ? "bg-purple-600 text-white shadow-lg" : "text-purple-200 hover:bg-white/10"
-                    }`}
-                  >
+                  <button onClick={() => setActiveTab("games")} className={`px-6 py-3 rounded-lg font-semibold transition-all ${activeTab === "games" ? "bg-purple-600 text-white shadow-lg" : "text-purple-200 hover:bg-white/10"}`}>
                     عرض الألعاب
                   </button>
-                  <button
-                    onClick={() => setActiveTab("add")}
-                    className={`px-6 py-3 rounded-lg font-semibold transition-all duration-200 ${
-                      activeTab === "add" ? "bg-purple-600 text-white shadow-lg" : "text-purple-200 hover:bg-white/10"
-                    }`}
-                  >
+                  <button onClick={() => setActiveTab("add")} className={`px-6 py-3 rounded-lg font-semibold transition-all ${activeTab === "add" ? "bg-purple-600 text-white shadow-lg" : "text-purple-200 hover:bg-white/10"}`}>
                     إضافة لعبة
                   </button>
-                  <button
-                    onClick={() => setActiveTab("tags")}
-                    className={`px-6 py-3 rounded-lg font-semibold transition-all duration-200 ${
-                      activeTab === "tags" ? "bg-purple-600 text-white shadow-lg" : "text-purple-200 hover:bg-white/10"
-                    }`}
-                  >
+                  <button onClick={() => setActiveTab("tags")} className={`px-6 py-3 rounded-lg font-semibold transition-all ${activeTab === "tags" ? "bg-purple-600 text-white shadow-lg" : "text-purple-200 hover:bg-white/10"}`}>
                     إدارة التصنيفات
                   </button>
                 </div>
@@ -126,9 +93,9 @@ function App() {
           )}
         </Authenticated>
 
-        {/* عرض المحتوى بناءً على التبويب النشط */}
         <div className="mt-8">
-          {activeTab === "games" && <GamesList />}
+          {/* هنا قمنا بإرسال وظيفة فتح التبويب لمكون قائمة الألعاب */}
+          {activeTab === "games" && <GamesList onOpenTagsInfo={() => setActiveTab("tags-info")} />}
           {activeTab === "tags-info" && <TagsInfo />}
           
           <Authenticated>
