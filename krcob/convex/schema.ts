@@ -40,7 +40,7 @@ const applicationTables = {
   
   tags: defineTable({
     name: v.string(),
-    group: v.string(), // الحقل الجديد لتصنيف التاقات إلى مجموعات
+    group: v.string(), // الحقل الجديد المضاف
     description: v.optional(v.string()),
     createdBy: v.id("users"),
     createdByName: v.optional(v.string()),
@@ -49,10 +49,9 @@ const applicationTables = {
     updatedByName: v.optional(v.string()),
   })
     .index("by_name", ["name"])
-    .index("by_group", ["group"]), // فهرس جديد لتسريع تصفية المجموعات في صفحة البحث
+    .index("by_group", ["group"]), // فهرس لتسريع البحث حسب المجموعة
 };
 
-// 3. تصدير المخطط الكامل
 export default defineSchema({
   ...extendedAuthTables,
   ...applicationTables,
