@@ -4,17 +4,16 @@ import { useState, useMemo } from "react";
 import { toast } from "sonner";
 import { EditGameModal } from "./EditGameModal";
 import { GameDetailsModal } from "./GameDetailsModal";
-import { TagsInfoModal } from "./TagsInfoModal"; // تأكد من وجود هذا الملف أو استبدله بالاسم الصحيح للنافذة
 import { Id } from "../../convex/_generated/dataModel";
 import { getGroupTheme } from "../lib/utils";
 
+// سنستخدم وظيفة التنقل اليدوي بدلاً من استيراد مكتبات قد لا تكون موجودة
 export function GamesList() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [actualSearchQuery, setActualSearchQuery] = useState("");
   const [editingGame, setEditingGame] = useState<any>(null);
   const [selectedGameId, setSelectedGameId] = useState<Id<"games"> | null>(null);
-  const [showTagsInfo, setShowTagsInfo] = useState(false); // الحالة الجديدة لفتح النافذة
   
   const games = useQuery(api.games.list, { 
     categories: selectedCategories.length > 0 ? selectedCategories : undefined,
@@ -37,6 +36,15 @@ export function GamesList() {
     setSelectedCategories(prev => 
       prev.includes(category) ? prev.filter(c => c !== category) : [...prev, category]
     );
+  };
+
+  const handleTagsInfoClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    // استخدام pushState يغير الرابط ويفتح الصفحة دون عمل Refresh
+    window.history.pushState({}, '', '/tags-info');
+    // إرسال حدث للنظام ليقوم بفتح الصفحة/النافذة المطلوبة
+    window.dispatchEvent(new PopStateEvent('popstate'));
   };
 
   if (games === undefined || categoriesWithDescriptions === undefined) {
@@ -72,14 +80,9 @@ export function GamesList() {
               تصفية ذكية
             </h3>
 
-            {/* الزر الآن يقوم بفتح النافذة برمجياً بدلاً من تغيير الرابط */}
+            {/* الزر الآن يستخدم وظيفة التنقل الذكي handleTagsInfoClick */}
             <button 
-              type="button"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                setShowTagsInfo(true); // يفتح النافذة فوراً
-              }}
+              onClick={handleTagsInfoClick}
               className="flex items-center gap-2 bg-[#6b21a8] hover:bg-[#7e22ce] text-white text-[11px] font-bold px-4 py-2 rounded-xl transition-all shadow-lg border border-purple-500/30 cursor-pointer"
             >
               <span className="bg-white/20 w-5 h-5 flex items-center justify-center rounded-full text-[10px]">؟</span>
@@ -144,7 +147,7 @@ export function GamesList() {
                   const tagInfo = categoriesWithDescriptions?.find(t => t.name === cat);
                   const theme = getGroupTheme(tagInfo?.group || "");
                   return (
-                    <span key={cat} className={`px-2 py-0.5 rounded text-[9px] font-black text-white ${theme.bg} backdrop-blur-md shadow-sm`}>
+                    <span key={cat} className={`px-2 py-0.5 rounded text-[9px] font-black text-white ${theme.bg} backdrop-blur-md`}>
                       {cat}
                     </span>
                   );
@@ -155,20 +158,16 @@ export function GamesList() {
               <h3 className="text-xl font-black text-white mb-2 group-hover:text-purple-400 transition-colors">{game.title}</h3>
               <p className="text-gray-400 text-xs leading-relaxed line-clamp-2 mb-6">{game.description}</p>
               <div className="flex justify-between items-center border-t border-white/5 pt-4">
-                <span className="text-[10px] text-gray-500 font-bold">📅 {new Date(game._creationTime).toLocaleDateString('ar-SA')}</span>
-                <span className="text-[10px] text-purple-400 font-black">التفاصيل ←</span>
+                <span className="text-[10px] text-gray-500 font-bold uppercase">📅 {new Date(game._creationTime).toLocaleDateString('ar-SA')}</span>
+                <span className="text-[10px] text-purple-400 font-black tracking-widest uppercase">التفاصيل ←</span>
               </div>
             </div>
           </div>
         ))}
       </div>
 
-      {/* النوافذ المنبثقة */}
       {selectedGameId && <GameDetailsModal gameId={selectedGameId} onClose={() => setSelectedGameId(null)} />}
       {editingGame && <EditGameModal game={editingGame} onClose={() => setEditingGame(null)} onSuccess={() => setEditingGame(null)} />}
-      
-      {/* استدعاء نافذة معاني التصنيفات عند الضغط على الزر الجديد */}
-      {showTagsInfo && <TagsInfoModal onClose={() => setShowTagsInfo(false)} />}
     </div>
   );
 }
