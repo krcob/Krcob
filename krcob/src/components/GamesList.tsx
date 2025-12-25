@@ -6,8 +6,6 @@ import { EditGameModal } from "./EditGameModal";
 import { GameDetailsModal } from "./GameDetailsModal";
 import { Id } from "../../convex/_generated/dataModel";
 import { getGroupTheme } from "../lib/utils";
-// استيراد Link للتنقل بين الصفحات
-import { Link } from "react-router-dom"; 
 
 export function GamesList() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -63,7 +61,7 @@ export function GamesList() {
         </form>
       </div>
 
-      {/* قسم التصفية الذكية مع زر "معنى التصنيفات" المدمج */}
+      {/* قسم التصفية الذكية مع رابط HTML عادي */}
       <div className="bg-black/20 backdrop-blur-md rounded-2xl p-6 border border-white/5 shadow-2xl">
         <div className="flex justify-between items-center mb-8 border-b border-white/5 pb-4">
           <div className="flex items-center gap-4">
@@ -72,15 +70,16 @@ export function GamesList() {
               تصفية ذكية
             </h3>
             
-            <div className="h-4 w-[1px] bg-white/10"></div> {/* فاصل عمودي */}
+            <div className="h-4 w-[1px] bg-white/10"></div>
 
-            <Link 
-              to="/tags-info" 
+            {/* استخدمنا <a> هنا بدلاً من <Link> لتجنب الخطأ */}
+            <a 
+              href="/tags-info" 
               className="group flex items-center gap-2 text-xs font-bold text-gray-400 hover:text-purple-400 transition-all"
             >
               <span className="flex items-center justify-center w-5 h-5 rounded-full border border-gray-600 group-hover:border-purple-500 text-[10px]">❓</span>
               معنى التصنيفات
-            </Link>
+            </a>
           </div>
           
           {selectedCategories.length > 0 && (
@@ -123,7 +122,7 @@ export function GamesList() {
         </div>
       </div>
 
-      {/* عرض الألعاب كما هي */}
+      {/* عرض الألعاب */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {games.map((game) => (
           <div
