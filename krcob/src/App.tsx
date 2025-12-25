@@ -32,17 +32,40 @@ function App() {
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
+          {/* الأزرار العلوية المحدثة */}
           <div className="flex justify-start gap-3 flex-wrap mb-6">
-            <button onClick={openDiscord} className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-4 py-2 rounded-lg font-semibold transition-all duration-200 shadow-lg flex items-center gap-2 text-sm">
-              حياك! العب معنا
+            
+            {/* زر الصفحة الرئيسية الجديد */}
+            <button
+              onClick={() => setActiveTab("games")}
+              className={`px-4 py-2 rounded-lg font-semibold transition-all duration-200 shadow-lg flex items-center gap-2 text-sm ${
+                activeTab === "games" 
+                ? "bg-white text-purple-900" 
+                : "bg-white/10 text-white hover:bg-white/20 border border-white/10"
+              }`}
+            >
+              🏠 الصفحة الرئيسية
             </button>
 
-            <button onClick={openYouTube} className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-4 py-2 rounded-lg font-semibold transition-all duration-200 shadow-lg flex items-center gap-2 text-sm">
-              قناة اليوتيوب
+            <button
+              onClick={openDiscord}
+              className="bg-[#5865F2] hover:bg-[#4752C4] text-white px-4 py-2 rounded-lg font-semibold transition-all duration-200 shadow-lg hover:shadow-xl flex items-center gap-2 text-sm"
+            >
+              <span>🎮</span> حياك! العب معنا
             </button>
 
-            <button onClick={openSupport} className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-4 py-2 rounded-lg font-semibold transition-all duration-200 shadow-lg flex items-center gap-2 text-sm">
-              ادعمنا
+            <button
+              onClick={openYouTube}
+              className="bg-[#FF0000] hover:bg-[#CC0000] text-white px-4 py-2 rounded-lg font-semibold transition-all duration-200 shadow-lg hover:shadow-xl flex items-center gap-2 text-sm"
+            >
+              <span>🎬</span> قناة اليوتيوب
+            </button>
+
+            <button
+              onClick={openSupport}
+              className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-4 py-2 rounded-lg font-semibold transition-all duration-200 shadow-lg hover:shadow-xl flex items-center gap-2 text-sm"
+            >
+              <span>💰</span> ادعمنا
             </button>
 
             <button
@@ -57,8 +80,11 @@ function App() {
             </button>
             
             <Unauthenticated>
-              <button onClick={() => setShowAdminLogin(true)} className="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white px-4 py-2 rounded-lg font-semibold transition-all duration-200 shadow-lg text-sm">
-                🔐 دخول الإدارة
+              <button
+                onClick={() => setShowAdminLogin(true)}
+                className="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white px-4 py-2 rounded-lg font-semibold transition-all duration-200 shadow-lg text-sm"
+              >
+                🔐 
               </button>
             </Unauthenticated>
             
@@ -67,24 +93,41 @@ function App() {
             </Authenticated>
           </div>
 
+          {/* العنوان الرئيسي - جعله يوجه للرئيسية أيضاً عند الضغط */}
           <div className="text-center cursor-pointer" onClick={() => setActiveTab("games")}>
             <h1 className="text-4xl font-bold text-white mb-2">🎮 مكتبة الألعاب</h1>
             <p className="text-purple-200">اكتشف وشارك أفضل الألعاب</p>
           </div>
         </div>
 
+        {/* أزرار التحكم للمسؤول فقط */}
         <Authenticated>
           {isAdmin && (
             <div className="flex justify-center mb-8">
               <div className="bg-black/20 backdrop-blur-md rounded-xl p-2 border border-white/10">
                 <div className="flex gap-2">
-                  <button onClick={() => setActiveTab("games")} className={`px-6 py-3 rounded-lg font-semibold transition-all ${activeTab === "games" ? "bg-purple-600 text-white shadow-lg" : "text-purple-200 hover:bg-white/10"}`}>
+                  <button
+                    onClick={() => setActiveTab("games")}
+                    className={`px-6 py-3 rounded-lg font-semibold transition-all duration-200 ${
+                      activeTab === "games" ? "bg-purple-600 text-white shadow-lg" : "text-purple-200 hover:bg-white/10"
+                    }`}
+                  >
                     عرض الألعاب
                   </button>
-                  <button onClick={() => setActiveTab("add")} className={`px-6 py-3 rounded-lg font-semibold transition-all ${activeTab === "add" ? "bg-purple-600 text-white shadow-lg" : "text-purple-200 hover:bg-white/10"}`}>
+                  <button
+                    onClick={() => setActiveTab("add")}
+                    className={`px-6 py-3 rounded-lg font-semibold transition-all duration-200 ${
+                      activeTab === "add" ? "bg-purple-600 text-white shadow-lg" : "text-purple-200 hover:bg-white/10"
+                    }`}
+                  >
                     إضافة لعبة
                   </button>
-                  <button onClick={() => setActiveTab("tags")} className={`px-6 py-3 rounded-lg font-semibold transition-all ${activeTab === "tags" ? "bg-purple-600 text-white shadow-lg" : "text-purple-200 hover:bg-white/10"}`}>
+                  <button
+                    onClick={() => setActiveTab("tags")}
+                    className={`px-6 py-3 rounded-lg font-semibold transition-all duration-200 ${
+                      activeTab === "tags" ? "bg-purple-600 text-white shadow-lg" : "text-purple-200 hover:bg-white/10"
+                    }`}
+                  >
                     إدارة التصنيفات
                   </button>
                 </div>
@@ -93,8 +136,8 @@ function App() {
           )}
         </Authenticated>
 
+        {/* عرض المحتوى بناءً على التبويب النشط */}
         <div className="mt-8">
-          {/* هنا قمنا بإرسال وظيفة فتح التبويب لمكون قائمة الألعاب */}
           {activeTab === "games" && <GamesList onOpenTagsInfo={() => setActiveTab("tags-info")} />}
           {activeTab === "tags-info" && <TagsInfo />}
           
