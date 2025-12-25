@@ -3,10 +3,11 @@ import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { toast } from "sonner";
 
-// تعريف المجموعات الثابتة
+// التعديل: فصل المجموعات لتصبح خيارات مستقلة
 const TAG_GROUPS = [
   "أنواع الألعاب (Genres)",
-  "نمط اللعب والاتصال (Play Style)",
+  "نمط اللعب",
+  "نوع الاتصال",
   "المنصات والأجهزة (Platforms)",
   "المتاجر والوصول (Stores & Access)",
   "الأبعاد والمنظور (Visuals & Perspective)"
@@ -16,7 +17,7 @@ export function TagManagement() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingTag, setEditingTag] = useState<any>(null);
   const [newTagName, setNewTagName] = useState("");
-  const [newTagGroup, setNewTagGroup] = useState(TAG_GROUPS[0]); // الحالة الجديدة للمجموعة
+  const [newTagGroup, setNewTagGroup] = useState(TAG_GROUPS[0]); 
   const [newTagDescription, setNewTagDescription] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -38,7 +39,7 @@ export function TagManagement() {
     try {
       await addTag({
         name: newTagName.trim(),
-        group: newTagGroup, // إرسال المجموعة
+        group: newTagGroup, 
         description: newTagDescription.trim() || undefined,
       });
       
@@ -65,7 +66,7 @@ export function TagManagement() {
       await updateTag({
         id: editingTag._id,
         name: newTagName.trim(),
-        group: newTagGroup, // تحديث المجموعة
+        group: newTagGroup, 
         description: newTagDescription.trim() || undefined,
       });
       
@@ -125,7 +126,6 @@ export function TagManagement() {
         </button>
       </div>
 
-      {/* Add/Edit Form */}
       {(showAddForm || editingTag) && (
         <div className="bg-white/5 border border-white/20 rounded-lg p-4 mb-6">
           <h4 className="text-lg font-semibold text-white mb-4">
@@ -182,7 +182,6 @@ export function TagManagement() {
         </div>
       )}
 
-      {/* Tags List */}
       <div className="space-y-3">
         {tags.length === 0 ? (
           <div className="text-center py-8">
