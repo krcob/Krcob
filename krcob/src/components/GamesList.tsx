@@ -7,7 +7,8 @@ import { TagWithDescription } from "./TagWithDescription";
 import { CategoriesInfoModal } from "./CategoriesInfoModal";
 import { GameDetailsModal } from "./GameDetailsModal";
 import { Id } from "../../convex/_generated/dataModel";
-import { getGroupTheme } from "../../lib/utils"; // استيراد دالة الألوان
+// التصحيح هنا: استخدام "../" للوصول لملد lib من داخل components
+import { getGroupTheme } from "../lib/utils";
 
 export function GamesList() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -51,7 +52,7 @@ export function GamesList() {
 
   return (
     <div className="space-y-8" dir="rtl">
-      {/* Search Bar */}
+      {/* شريط البحث */}
       <div className="bg-black/20 backdrop-blur-md rounded-2xl p-6 border border-white/5 shadow-2xl">
         <form onSubmit={(e) => { e.preventDefault(); setActualSearchQuery(searchQuery); }} className="relative">
           <input
@@ -65,16 +66,19 @@ export function GamesList() {
         </form>
       </div>
 
-      {/* Advanced Filter with Group Colors */}
+      {/* قسم التصفية الملونة */}
       <div className="bg-black/20 backdrop-blur-md rounded-2xl p-6 border border-white/5 shadow-2xl">
         <div className="flex justify-between items-center mb-8">
           <h3 className="text-xl font-black text-white flex items-center gap-3">
             <span className="p-2 bg-purple-500/20 rounded-lg text-purple-400">⚡</span>
             تصفية ذكية
           </h3>
-          {selectedCategories.length > 0 && (
-            <button onClick={() => setSelectedCategories([])} className="text-xs font-bold text-red-400 hover:underline">مسح الكل</button>
-          )}
+          <div className="flex gap-4">
+            {selectedCategories.length > 0 && (
+              <button onClick={() => setSelectedCategories([])} className="text-xs font-bold text-red-400 hover:underline">مسح الكل</button>
+            )}
+            <button onClick={() => setShowCategoriesInfo(true)} className="text-xs font-bold text-purple-400 hover:underline">معنى التصنيفات</button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -83,7 +87,7 @@ export function GamesList() {
             return (
               <div key={groupName} className="space-y-4">
                 <h4 className={`text-[10px] font-black uppercase tracking-[0.2em] ${theme.text} mb-2 flex items-center gap-2`}>
-                  <span className={`w-1.5 h-1.5 rounded-full ${theme.bg.replace('bg-', 'bg-')}`}></span>
+                  <span className={`w-1.5 h-1.5 rounded-full ${theme.bg}`}></span>
                   {groupName.split(' (')[0]}
                 </h4>
                 <div className="flex flex-wrap gap-2">
@@ -107,7 +111,7 @@ export function GamesList() {
         </div>
       </div>
 
-      {/* Games Grid */}
+      {/* عرض الألعاب */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {games.map((game) => (
           <div
@@ -115,12 +119,11 @@ export function GamesList() {
             onClick={() => setSelectedGameId(game._id)}
             className="group relative bg-white/5 rounded-2xl overflow-hidden border border-white/10 hover:border-purple-500/50 transition-all duration-500 hover:-translate-y-2 cursor-pointer shadow-xl"
           >
-            {/* Image Wrapper */}
+            {/* غلاف اللعبة */}
             <div className="aspect-[16/10] overflow-hidden relative">
               <img src={game.imageUrl} alt={game.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
               <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent opacity-90"></div>
               
-              {/* Floating Tags on Image */}
               <div className="absolute bottom-4 right-4 flex flex-wrap gap-1">
                 {game.categories.slice(0, 3).map((cat: string) => {
                   const tagInfo = categoriesWithDescriptions?.find(t => t.name === cat);
@@ -134,7 +137,7 @@ export function GamesList() {
               </div>
             </div>
 
-            {/* Content */}
+            {/* تفاصيل البطاقة */}
             <div className="p-6">
               <div className="flex justify-between items-start mb-2">
                 <h3 className="text-xl font-black text-white group-hover:text-purple-400 transition-colors">{game.title}</h3>
@@ -155,7 +158,7 @@ export function GamesList() {
         ))}
       </div>
 
-      {/* Modals */}
+      {/* النوافذ المنبثقة */}
       {selectedGameId && <GameDetailsModal gameId={selectedGameId} onClose={() => setSelectedGameId(null)} />}
       {editingGame && <EditGameModal game={editingGame} onClose={() => setEditingGame(null)} onSuccess={() => setEditingGame(null)} />}
       {showCategoriesInfo && <CategoriesInfoModal onClose={() => setShowCategoriesInfo(false)} />}
