@@ -50,7 +50,7 @@ export function GamesList({ onOpenTagsInfo }: GamesListProps) {
 
   return (
     <div className="space-y-12" dir="rtl">
-      {/* 1. شريط البحث - تصميم أنيق */}
+      {/* 1. شريط البحث */}
       <div className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/10 shadow-2xl relative">
         <form onSubmit={(e) => { e.preventDefault(); setActualSearchQuery(searchQuery); }} className="relative">
           <input
@@ -69,7 +69,7 @@ export function GamesList({ onOpenTagsInfo }: GamesListProps) {
         </form>
       </div>
 
-      {/* 2. قسم التصفية الذكية - تصميم أنيق */}
+      {/* 2. قسم التصفية الذكية */}
       <div className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/10 shadow-2xl relative">
         <div className="flex justify-between items-center mb-8 pb-4 border-b border-white/10">
           <div className="flex items-center gap-4">
@@ -77,8 +77,6 @@ export function GamesList({ onOpenTagsInfo }: GamesListProps) {
               <span className="p-2 bg-purple-500/20 rounded-lg text-purple-400 text-sm">⚡</span>
               تصفية ذكية
             </h3>
-
-            {/* زر معنى التصنيفات - تصميم متوافق */}
             <button 
               type="button"
               onClick={onOpenTagsInfo}
@@ -99,7 +97,6 @@ export function GamesList({ onOpenTagsInfo }: GamesListProps) {
           )}
         </div>
 
-        {/* شبكة التصنيفات - تصميم أنيق */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {Object.entries(groupedCategories).map(([groupName, tags]: [string, any]) => {
             const theme = getGroupTheme(groupName);
@@ -130,26 +127,25 @@ export function GamesList({ onOpenTagsInfo }: GamesListProps) {
         </div>
       </div>
 
-      {/* 3. عرض الألعاب - التصميم الجديد للبطاقات */}
+      {/* 3. عرض الألعاب - عرض جميع التصنيفات */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
         {games.map((game) => (
           <div
             key={game._id}
             onClick={() => setSelectedGameId(game._id)}
-            className="group relative bg-white/5 rounded-2xl overflow-hidden border border-white/10 hover:border-purple-500/50 transition-all duration-500 hover:-translate-y-2 cursor-pointer shadow-xl
-                       hover:shadow-[0_0_30px_rgba(147,51,234,0.4)]" /* توهج أرجواني عند التحويم */
+            className="group relative bg-white/5 rounded-2xl overflow-hidden border border-white/10 hover:border-purple-500/50 transition-all duration-500 hover:-translate-y-2 cursor-pointer shadow-xl hover:shadow-[0_0_30px_rgba(147,51,234,0.4)]"
           >
             <div className="aspect-[16/10] overflow-hidden relative">
               <img src={game.imageUrl} alt={game.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
               <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent opacity-90"></div>
               
-              {/* تصنيفات اللعبة - تصميم محسّن */}
-              <div className="absolute bottom-4 right-4 flex flex-wrap gap-1">
-                {game.categories.slice(0, 3).map((cat: string) => {
+              {/* تعديل هنا: إزالة .slice(0, 3) لإظهار كافة التاقات */}
+              <div className="absolute bottom-4 right-4 left-4 flex flex-wrap gap-1 justify-end">
+                {game.categories.map((cat: string) => {
                   const tagInfo = categoriesWithDescriptions?.find(t => t.name === cat);
                   const theme = getGroupTheme(tagInfo?.group || "");
                   return (
-                    <span key={cat} className={`px-2.5 py-0.5 rounded-md text-[10px] font-black text-white ${theme.bg} backdrop-blur-sm shadow-md`}>
+                    <span key={cat} className={`px-2 py-0.5 rounded-md text-[9px] font-black text-white ${theme.bg} backdrop-blur-sm shadow-md border border-white/5`}>
                       {cat}
                     </span>
                   );
